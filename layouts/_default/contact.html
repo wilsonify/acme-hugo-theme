@@ -30,7 +30,7 @@
     </template>
 
     {{/* Determine if we are on Netlify */}}
-    {{ $isNetlify := or (site.Param "netlify") (eq (getenv "CI") "true") }}
+    {{ $isNetlify := site.Param "netlify" }}
 
     {{/* Form attributes depending on environment */}}
     {{ if $isNetlify }}

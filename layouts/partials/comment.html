@@ -2,7 +2,7 @@
   <h2>Comments</h2>
 
   {{/* Determine if we are on Netlify */}}
-  {{ $isNetlify := or (site.Param "netlify") (eq (getenv "CI") "true") }}
+  {{ $isNetlify := site.Param "netlify" }}
 
   {{/* Load the appropriate comment list */}}
   {{ $comments := dict }}

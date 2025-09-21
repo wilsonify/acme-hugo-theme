@@ -1,6 +1,6 @@
 {{define "post"}}
   {{$netlify := "false"}}
-  {{if {{ $isNetlify := or (site.Param "netlify") (eq (getenv "CI") "true") }}
+  {{ $isNetlify := site.Param "netlify" }}
 {{if $isNetlify}}}}
   {{ $netlify = "true" }}
   {{end}}
