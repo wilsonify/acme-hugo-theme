@@ -1,67 +1,89 @@
-{{define "bodyClass"}} 
-{{ path.Dir .Page.FirstSection.File.Path }} page 
-{{end}}
+{{ define "bodyClass" }}
+  {{ with .Page.FirstSection }}
+    {{ .Title | urlize }} page
+  {{ else }}
+    {{ .Type }} page
+  {{ end }}
+{{ end }}
 
-{{define "body"}}
+{{ define "body" }}
 <div id="content">
   <main>
-    {{$img := .Resources.GetMatch "cover.*"}}
-    {{ if $img }}
-    <img alt="{{.Title}}" width="1920" height="400" loading="lazy" src="{{($img.Fill "1920x400").Permalink}}">
+    {{ $img := .Resources.GetMatch "cover.*" }}
+    {{ if and $img (in $img.MediaType.MainType "image") }}
+      {{ with $img.Fill "1920x400" }}
+        <img
+          alt="{{ $.Title }}"
+          width="1920"
+          height="400"
+          loading="lazy"
+          src="{{ .Permalink }}">
+      {{ end }}
     {{ end }}
-    {{with .Title}}
-      <h1>
-        {{.}}
-      </h1>
-    {{end}}
-    {{if .Param "toc"}}
+
+    {{ with .Title }}
+      <h1>{{ . }}</h1>
+    {{ end }}
+
+    {{ if .Param "toc" }}
       <h2>Table of Contents</h2>
-      {{.TableOfContents}}
-    {{end}}
+      {{ .TableOfContents }}
+    {{ end }}
+
     <div class="content">
-      {{.Content}}
+      {{ .Content }}
     </div>
   </main>
+
   <aside>
-    <section> 
-      <h2>{{i18n "info"}}</h2> 
-      <p>{{.Summary}}</p>
-    </section>
+    {{ with .Summary }}
+      <section>
+        <h2>{{ i18n "info" }}</h2>
+        <p>{{ . }}</p>
+      </section>
+    {{ end }}
+
     <section>
-      <h2>{{i18n "readTime"}}</h2>
-      <p>{{.ReadingTime}} min.</p> 
+      <h2>{{ i18n "readTime" }}</h2>
+      <p>{{ .ReadingTime }} min.</p>
     </section>
+
     <section>
-      <h2>{{i18n "wordCount"}}</h2>
-      <p>≈ {{.FuzzyWordCount}}</p> 
+      <h2>{{ i18n "wordCount" }}</h2>
+      <p>≈ {{ .FuzzyWordCount }}</p>
     </section>
-    {{with .Params.tags}}
-    <section>
-      <h2>{{i18n "tags"}}</h2> 
-      {{range .}} 
-        <p>
-          <a href="{{"/tags/" | relLangURL}}{{. | urlize}}"> 
-            {{. | humanize}}
-          </a> 
-        </p>
-      {{end}}
-    </section>
-    {{end}}
+
+    {{ with .Params.tags }}
+      <section>
+        <h2>{{ i18n "tags" }}</h2>
+        {{ range . }}
+          <p>
+            <a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}">
+              {{ . | humanize }}
+            </a>
+          </p>
+        {{ end }}
+      </section>
+    {{ end }}
   </aside>
 </div>
-{{with site.RegularPages.Related .}}
-<div id="related">
-  <h2>{{i18n "related"}}</h2>
-  <ul class="posts">
-    {{range first 5 .}}
-     {{.Render "card"}}
-    {{end}}
-  </ul>
-</div>
-{{end}}
-{{ partial "comment.html" (dict 
+
+{{ with site.RegularPages.Related . }}
+  {{ if . }}
+    <div id="related">
+      <h2>{{ i18n "related" }}</h2>
+      <ul class="posts">
+        {{ range first 5 . }}
+          {{ .Render "card" }}
+        {{ end }}
+      </ul>
+    </div>
+  {{ end }}
+{{ end }}
+
+{{ partial "comment.html" (dict
   "FormspreeCommentForm" ($.Param "FormspreeCommentForm")
-  "RelPermalink" .Page.RelPermalink 
+  "RelPermalink" .Page.RelPermalink
   "Disabled" ($.Param "CommentDisabled")
 ) }}
-{{end}}
+{{ end }}
