@@ -1,18 +1,22 @@
 {{$response := newScratch}}
-{{if and site.Params.FormspreeCommentForm (getenv "COMMENTS_TOKEN")}}
+{{ $commentsToken := site.Params.CommentsToken }}
+
+{{ if and site.Params.FormspreeCommentForm $commentsToken }}
 
   {{ $url := printf "https://formspree.io/api/0/forms/%s/submissions" site.Params.FormspreeCommentForm }}
-  {{ $opts := dict "headers" (dict "Authorization" (printf "Bearer %s" (getenv "COMMENTS_TOKEN"))) }}
+  {{ $opts := dict "headers" (dict "Authorization" (printf "Bearer %s" $commentsToken)) }}
   {{ $remote := resources.GetRemote $url $opts }}
   {{ $comments := $remote | transform.Unmarshal }}
 
   {{ range sort $comments.submissions "_date" "ASC" }}
-    {{if not ($response.Get .url)}}
-      {{$response.Set .url (slice )}}
-    {{end}}
-
+    {{ if not ($response.Get .url) }}
+      {{$response.Set .url (slice)}}
+    {{ end }}
     {{$response.Add .url .}}
   {{ end }}
+
+{{ else }}
+  {{/* Local/testing fallback: no comments fetched */}}
 {{ end }}
 
-{{return $response.Values}}
+{{ return $response.Values }}
