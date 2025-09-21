@@ -1,60 +1,69 @@
-{{define "bodyClass"}}contact page{{end}}
-{{define "body"}}
+{{ define "bodyClass" }}contact page{{ end }}
+
+{{ define "body" }}
 <main>
   {{$img := .Resources.GetMatch "cover.*"}}
   {{ if $img }}
-  <img alt="{{.Title}}" width="1920" height="400" loading="lazy" src="{{($img.Fill "1920x400 Center").Permalink}}">
+    <img alt="{{ .Title }}" width="1920" height="400" loading="lazy"
+         src="{{ ($img.Fill "1920x400 Center").Permalink }}">
   {{ end }}
-  {{with .Title}}
-    <h1>
-      {{.}}
-    </h1>
-  {{end}}
+
+  {{ with .Title }}
+    <h1>{{ . }}</h1>
+  {{ end }}
 
   <div class="contact-box">
     <div class="content">
-      {{.Content}}
+      {{ .Content }}
     </div>
+
     <template id="contact-success">
       <div class="success">
-      {{default (i18n "contactSuccess") ($.Param "contact-success")}}
-    </div>
-    </template>
-    <template id="contact-error">
-      <div class="error">
-        {{default (i18n "contactError") ($.Param "contact-error")}}
+        {{ default (i18n "contactSuccess") ($.Param "contact-success") }}
       </div>
     </template>
 
-    {{if {{ $isNetlify := or (site.Param "netlify") (eq (getenv "CI") "true") }}
-{{if $isNetlify}}}}
-      <form data-dynamic-form data-success="#contact-success" data-error="#contact-error" netlify="true" name="Contact">
+    <template id="contact-error">
+      <div class="error">
+        {{ default (i18n "contactError") ($.Param "contact-error") }}
+      </div>
+    </template>
+
+    {{/* Determine if we are on Netlify */}}
+    {{ $isNetlify := or (site.Param "netlify") (eq (getenv "CI") "true") }}
+
+    {{/* Form attributes depending on environment */}}
+    {{ if $isNetlify }}
+      {{ $formAttrs := `data-dynamic-form data-success="#contact-success" data-error="#contact-error" netlify="true" name="Contact"` }}
     {{ else }}
-      <form data-dynamic-form data-success="#contact-success" data-error="#contact-error" action="https://formspree.io/f/{{.Param "contact"}}" method="post">
+      {{ $formAttrs := printf `data-dynamic-form data-success="#contact-success" data-error="#contact-error" action="https://formspree.io/f/%s" method="post"` (.Param "contact") }}
     {{ end }}
-          <div>
-          <label for="name">{{i18n "name"}}:</label>
-          <input id="name" name="name" type="text" required>
-        </div>
-        <div>
-          <label for="email">{{i18n "email"}}:</label>
-          <input
-            {{if {{ $isNetlify := or (site.Param "netlify") (eq (getenv "CI") "true") }}
-{{if $isNetlify}}}}
-              id="email" name="email"
-            {{ else }} 
-              name="_replyto"
-            {{ end }}
-            type="email" required>
-        </div>
-        <div>
-          <label for="message">{{i18n "message"}}:</label>
-          <textarea id="message" name="message" cols="50" rows="10" required></textarea>
-        </div>
-        <div>
-          <button type="submit">{{i18n "send"}}</button>
-        </div>
+
+    {{/* Email field name for Netlify vs Formspree */}}
+    {{ if $isNetlify }}
+      {{ $emailName := "email" }}
+    {{ else }}
+      {{ $emailName := "_replyto" }}
+    {{ end }}
+
+    <form {{ if $isNetlify }}data-dynamic-form data-success="#contact-success" data-error="#contact-error" netlify="true" name="Contact"{{ else }}action="https://formspree.io/f/{{ .Param "contact" }}" method="post" data-dynamic-form data-success="#contact-success" data-error="#contact-error"{{ end }}>
+      <input type="hidden" name="url" value="{{ .RelPermalink }}">
+      <div>
+        <label for="name">{{ i18n "name" }}:</label>
+        <input id="name" name="name" type="text" required>
+      </div>
+      <div>
+        <label for="email">{{ i18n "email" }}:</label>
+        <input id="email" name="{{ if $isNetlify }}email{{ else }}_replyto{{ end }}" type="email" required>
+      </div>
+      <div>
+        <label for="message">{{ i18n "message" }}:</label>
+        <textarea id="message" name="message" cols="50" rows="10" required></textarea>
+      </div>
+      <div>
+        <button type="submit">{{ i18n "send" }}</button>
+      </div>
     </form>
   </div>
 </main>
-{{end}}
+{{ end }}
