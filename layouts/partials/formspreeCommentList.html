@@ -1,7 +1,10 @@
 {{$response := newScratch}}
 {{if and site.Params.FormspreeCommentForm (getenv "COMMENTS_TOKEN")}}
 
-  {{$comments:= getJSON "https://formspree.io/api/0/forms/" site.Params.FormspreeCommentForm "/submissions" (dict "Authorization" (printf "Bearer %s" (getenv "COMMENTS_TOKEN"))) }}
+  {{ $url := printf "https://formspree.io/api/0/forms/%s/submissions" site.Params.FormspreeCommentForm }}
+  {{ $opts := dict "headers" (dict "Authorization" (printf "Bearer %s" (getenv "COMMENTS_TOKEN"))) }}
+  {{ $remote := resources.GetRemote $url $opts }}
+  {{ $comments := $remote | transform.Unmarshal }}
 
   {{ range sort $comments.submissions "_date" "ASC" }}
     {{if not ($response.Get .url)}}

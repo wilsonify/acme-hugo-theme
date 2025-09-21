@@ -70,13 +70,15 @@
         {{$content := default "" .content}}
         {{$from := default "" .from}}
         {{if .tweet}}
-          {{$tweet := getJSON
-            "https://publish.twitter.com/oembed?url=" 
-            .tweet  "&omit_script=1&hide_media=1&hide_thread=1&dnt=true" }}
+          {{ $url := printf "https://publish.twitter.com/oembed?url=%s&omit_script=1&hide_media=1&hide_thread=1&dnt=true" .tweet }}
+          {{ $remote := resources.GetRemote $url }}
+          {{ $tweet := $remote | transform.Unmarshal }}
+
           {{$author = $tweet.author_name }}
           {{$from = "via Twitter"}}
           {{$content = $tweet.html }}
         {{end}}
+
         <li>
             <p>{{$content | safeHTML}}</p>
             <div>
