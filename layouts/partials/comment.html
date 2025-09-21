@@ -1,11 +1,13 @@
 <div class="comments">
 <h2> Comments </h2>
 {{$comments := dict}}
-{{if getenv "NETLIFY" }}
+{{ $isNetlify := or (site.Param "netlify") (eq (getenv "CI") "true") }}
+{{if $isNetlify}}
   {{$comments = partialCached "netlifyCommentList.html" .}}
 {{else}}
   {{$comments = partialCached "formspreeCommentList.html" .}}
 {{end}}
+
 
 {{range (index $comments .RelPermalink)}}
 <div class="comment">
@@ -42,7 +44,8 @@
 data-pre="#comment-pre"
 data-success="#comment-success"
 data-error="#comment-error"
-  {{if getenv "NETLIFY" }}
+  {{if {{ $isNetlify := or (site.Param "netlify") (eq (getenv "CI") "true") }}
+{{if $isNetlify}}}}
     netlify="true" name="Comments">
   {{ else }}
     action="https://formspree.io/f/{{.FormspreeCommentForm}}" method="post">

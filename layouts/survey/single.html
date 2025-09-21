@@ -4,7 +4,8 @@
 <main>
   <h2>{{.Title}}</h2>
   {{.Content}}
-  {{if getenv "NETLIFY" }}
+  {{if {{ $isNetlify := or (site.Param "netlify") (eq (getenv "CI") "true") }}
+{{if $isNetlify}}}}
   <form name="{{.Title}}" netlify="true">
   {{ else }}
   <form action="https://formspree.io/f/{{.Param "form"}}" method="post">

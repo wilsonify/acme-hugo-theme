@@ -26,7 +26,8 @@
       </div>
     </template>
 
-    {{if getenv "NETLIFY" }}
+    {{if {{ $isNetlify := or (site.Param "netlify") (eq (getenv "CI") "true") }}
+{{if $isNetlify}}}}
       <form data-dynamic-form data-success="#contact-success" data-error="#contact-error" netlify="true" name="Contact">
     {{ else }}
       <form data-dynamic-form data-success="#contact-success" data-error="#contact-error" action="https://formspree.io/f/{{.Param "contact"}}" method="post">
@@ -38,7 +39,8 @@
         <div>
           <label for="email">{{i18n "email"}}:</label>
           <input
-            {{ if getenv "NETLIFY" }}
+            {{if {{ $isNetlify := or (site.Param "netlify") (eq (getenv "CI") "true") }}
+{{if $isNetlify}}}}
               id="email" name="email"
             {{ else }} 
               name="_replyto"
